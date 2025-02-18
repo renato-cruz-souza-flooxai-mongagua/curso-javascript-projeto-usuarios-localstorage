@@ -14,7 +14,8 @@ class UserController {
 
     onEdit(){
 
-        document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e=>{
+
+       document.querySelector("#box-user-update .btn-cancel").addEventListener("click", e=>{
 
             this.showPanelCreate();
 
@@ -51,9 +52,9 @@ class UserController {
 
                     user.loadFromJSON(result);
 
-                    user.save();
+                    user.save().then(user => {
 
-                    this.getTr(user, tr);
+                        this.getTr(user, tr);
 
                     this.updateCount();
 
@@ -63,6 +64,10 @@ class UserController {
 
                     this.showPanelCreate();
 
+
+                    });
+
+                    
                 },
                 (e) => {
                     console.error(e);
@@ -89,16 +94,20 @@ class UserController {
 
             this.getPhoto(this.formEl).then(
                 (content) => {
-                    
+                   
                     values.photo = content;
 
-                    values.save();
+                    values.save().then(user => {
 
-                    this.addLine(values);
+                        this.addLine(user);
 
-                    this.formEl.reset();
+                        this.formEl.reset();
 
-                    btn.disabled = false;
+                        btn.disabled = false;
+
+                    } );
+
+                    
 
                 }, 
                 (e) => {
@@ -200,28 +209,11 @@ class UserController {
     selectAll(){
 
         //let users = User.getUsersStorage();
+        httpRequest.get('/users').then(data =>{
 
-        let ajax = new XMLHttpRequest()
+            data.users.forEach(dataUser=>{
 
-        ajax.open('GET', '/users')
-
-        ajax.onload = event => {
-
-            let obj = {users : []}
-
-            try{
-
-             obj = JSON.parse(ajax.responseText)
-
-         } catch(e){
-
-            console.error(e)
-
-         }
-
-            obj. users.forEach(dataUser=>{
-
-                let user = new User ();
+                let user = new User();
     
                 user.loadFromJSON(dataUser);
     
@@ -229,18 +221,7 @@ class UserController {
     
             });
 
-        };
-        ajax.send()
-
-        users.forEach(dataUser=>{
-
-            let user = new User();
-
-            user.loadFromJSON(dataUser);
-
-            this.addLine(user);
-
-        });
+        })
 
     }
 
